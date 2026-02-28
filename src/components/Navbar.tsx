@@ -3,6 +3,15 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
+const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+  if (link === "Home") return;
+  e.preventDefault();
+  const element = document.getElementById(link.toLowerCase());
+  if (element) {
+    element.scrollIntoView({ behavior: "smooth" });
+  }
+};
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -26,6 +35,7 @@ const Navbar = () => {
               key={link}
               href={link === "Home" ? "/" : `#${link.toLowerCase()}`}
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              onClick={(e) => handleNavClick(e, link)}
             >
               {link}
             </a>
@@ -51,7 +61,10 @@ const Navbar = () => {
                   key={link}
                   href={link === "Home" ? "/" : `#${link.toLowerCase()}`}
                   className="text-muted-foreground hover:text-primary transition-colors"
-                  onClick={() => setIsOpen(false)}
+                  onClick={(e) => {
+                    handleNavClick(e, link);
+                    setIsOpen(false);
+                  }}
                 >
                   {link}
                 </a>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Users, DollarSign, CalendarDays } from "lucide-react";
+import { Clock, MapPin, Users } from "lucide-react";
 import { api } from "@/lib/api";
 
 interface Drive {
@@ -17,6 +17,7 @@ interface Drive {
   appliedStudents: number;
   requiredStudents: number;
   status: string;
+  type?: string;
 }
 
 const PlacementsSection = () => {
@@ -39,9 +40,12 @@ const PlacementsSection = () => {
   }, []);
 
   const formatDate = (dateStr: string) => {
-    if (!dateStr) return "";
+    if (!dateStr) return { day: "", month: "" };
     const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();
+    return {
+      day: date.getDate(),
+      month: date.toLocaleDateString("en-GB", { month: "short" }).toUpperCase()
+    };
   };
 
   const handleRegister = () => {
@@ -67,66 +71,47 @@ const PlacementsSection = () => {
           </motion.div>
 
           <div className="space-y-4">
-            {drives.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                className="glass rounded-xl p-8 text-center"
-              >
-                <p className="text-muted-foreground">No placement drives available at the moment.</p>
-                <p className="text-sm text-muted-foreground mt-2">Check back soon for upcoming opportunities!</p>
-              </motion.div>
-            ) : (
-              drives.slice(0, 4).map((drive, i) => (
-                <motion.div
-                  key={drive.id}
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.15 }}
-                  className="glass rounded-xl p-5 hover:glow-border transition-all duration-300"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="bg-primary/10 rounded-lg p-3 text-center min-w-[60px]">
-                      <span className="text-sm font-semibold text-primary block">
-                        {formatDate(drive.driveDate)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">Placement</span>
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-foreground">{drive.name}</h4>
-                      <p className="text-sm text-muted-foreground">{drive.jobRole}</p>
-                      <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <DollarSign size={12} />
-                          {drive.ctcRange || "TBD"}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock size={12} />
-                          {drive.driveTime || "9:00 AM - 5:00 PM"}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin size={12} />
-                          {drive.location || "Main Auditorium"}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CalendarDays size={12} />
-                          Deadline: {drive.registrationDeadline || "TBD"}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Users size={12} />
-                          {drive.requiredStudents || 150} spots
-                        </span>
+            {drives.slice(0, 4).map((drive, i) => {
+                const { day, month } = formatDate(drive.drive_date || drive.driveDate);
+                return (
+                  <motion.div
+                    key={drive.id}
+                    initial={{ opacity: 0, x: 30 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.15 }}
+                    className="glass rounded-xl p-5 hover:glow-border transition-all duration-300"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="bg-primary/10 rounded-lg p-3 text-center min-w-[60px]">
+                        <span className="text-lg font-bold text-primary block">{day}</span>
+                        <span className="text-xs text-muted-foreground">{month}</span>
                       </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground">{drive.name}</h4>
+                        <p className="text-sm text-muted-foreground">{drive.job_role || drive.jobRole}</p>
+                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Clock size={12} />
+                            {drive.drive_time || drive.driveTime || "9:00 AM - 5:00 PM"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MapPin size={12} />
+                            {drive.location || "Main Auditorium"}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users size={12} />
+                            {drive.required_students || drive.requiredStudents || 150} spots
+                          </span>
+                        </div>
+                      </div>
+                      <Button size="sm" onClick={handleRegister}>
+                        Register
+                      </Button>
                     </div>
-                    <Button size="sm" onClick={handleRegister}>
-                      Register
-                    </Button>
-                  </div>
-                </motion.div>
-              ))
-            )}
+                  </motion.div>
+                );
+              })}
           </div>
         </div>
       </div>
